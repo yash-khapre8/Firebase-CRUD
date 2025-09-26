@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Firebase project</title>
+  </head>
+  <body>
+    <h1>Into the FB</h1>
+    <form class="add">
+      <label for="name">Name</label>
+      <input type="text" name="name" />
+      <label for="surname">Surname</label>
+      <input type="text" name="surname" />
+
+      <button>Add a new client</button>
+    </form>
+
+    <form class="del">
+      <label for="id">doc ID:</label>
+      <input type="text" name="id" />
+
+      <button>Delete an client</button>
+    </form>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        getDocs,
+        deleteDoc,
+        doc,
+        onSnapshot,
+        query,
+        where,
+      } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+      //addDoc for fS
+      const firebaseConfig = {
+        apiKey: "AIzaSyBpRkE-8j46Hi_Gxu0mly8gGJck9Sbugq4",
+        authDomain: "first-fe425.firebaseapp.com",
+        projectId: "first-fe425",
+        storageBucket: "first-fe425.firebasestorage.app",
+        messagingSenderId: "420690690856",
+        appId: "1:420690690856:web:894573e7e22d66e4ca461d",
+        measurementId: "G-50Q66MVYQB",
+      };
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app); // always pass app here
+      const collRef = collection(db, "User");
+      // for firestore
+      // getDocs(collRef)
+      //   .then((snapshot) => {   // ✅ correct arrow function
+      //     let users = [];
+      //     snapshot.docs.forEach((doc) => {
+      //       users.push({ ...doc.data(), id: doc.id });
+      //     });
+      //     console.log(users);   // ✅ check result
+      //   })
+      //   .catch((err) => {
+      //     console.error("Error fetching data:", err);
+      //   });
+
+      //for realtime firestore
+      // query
+      const p = query(collRef, where("name", "==", "ajay"));
+
+      onSnapshot(p, (snapshot) => {
+        let users = [];
+        snapshot.docs.forEach((doc) => {
+          users.push({ ...doc.data(), id: doc.id });
+        });
+        console.log(users);
+      });
+
+      // Adding document
+      let addform = document.querySelector(".add");
+      addform.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        try {
+          await addDoc(collRef, {
+            name: addform["name"].value, // ✅ safer way to access input by name attribute
+            surname: addform["surname"].value, // ✅ lowercase field name
+          });
+          addform.reset();
+          console.log("document added");
+        } catch (err) {
+          console.error("Error adding document:", err);
+        }
+      });
+
+      // deleting an document
+      const delnameform = document.querySelector(".del");
+      delnameform.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const docId = delnameform["id"].value.trim();
+        try {
+          const docRef = doc(db, "User", docId);
+          await deleteDoc(docRef);
+          delnameform.reset();
+          console.log("✅ Document deleted with ID:", docId);
+        } catch (err) {
+          console.error("❌ Error deleting document:", err);
+        }
+      });
+    </script>
+  </body>
+</html>
